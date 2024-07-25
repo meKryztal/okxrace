@@ -66,4 +66,4 @@ https://telegra.ph/Avtoklikker-dlya-BLUM-GAJD-05-29
 # Как получить query_id:
 Заходите в telegram web, открываете бота, жмете F12 или в десктопной версии открывайте окно, правой кнопкой жмете и выбираете самое нижнее "проверить" и переходите в Network, жмете старт в веб версии или перезагружаете страницу в десктопной, ищете запрос с именем info, в правой колонке находите Rawdata: query_id=бла бла бла или user=
 
-![photo_2024-07-24_01-33-06](https://github.com/user-attachments/assets/0fd130cd-e8e9-4e71-bf57-9f7a9b4e9d56)
+![photo_2024-07-25_15-02-24](https://github.com/user-attachments/assets/af7eafb9-32d5-49f3-bf15-617a18b0f6ca)
