@@ -54,7 +54,7 @@
 https://telegra.ph/Avtoklikker-dlya-BLUM-GAJD-05-29
    
 
-### Получить API_ID and API_HASH можно тут: my.telegram.org
+### Получить API_ID and API_HASH можно тут: https://my.telegram.org
 
 ## Настройте data/config.py перед запуском
 
