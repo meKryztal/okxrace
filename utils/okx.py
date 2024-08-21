@@ -280,10 +280,11 @@ class Okx:
             proxy=self.proxy
         )
 
-        response_json = await response.json()
+
 
 
         try:
+            response_json = await response.json()
             is_won = response_json.get('data', {}).get('won')
             claimed = response_json.get('data', {}).get('basePoint')
             num = response_json.get('data', {}).get('numChance')
