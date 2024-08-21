@@ -58,7 +58,7 @@ class Okx:
 
     async def main(self):
         await asyncio.sleep(random.uniform(*config.ACC_DELAY))
-
+        asyncio.create_task(self.continuous_guess_price())
         while True:
             await self.login()
             info = (await self.get_info())
@@ -104,11 +104,13 @@ class Okx:
 
             sleep = random.uniform(*config.BIG_SLEEP)
             logger.info(f'| Поток {self.thread} | {self.name}.session | Ушел в сон заданий на {sleep} сек')
-            await self.continuous_guess_price()
+
             await asyncio.sleep(sleep)
 
     async def continuous_guess_price(self):
+        await asyncio.sleep(30)
         while True:
+
             await self.guess_price()
 
 
