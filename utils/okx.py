@@ -33,12 +33,12 @@ class Okx:
             self.client = Client(name=account, api_id=config.API_ID, api_hash=config.API_HASH, workdir=config.WORKDIR, proxy=proxy_client)
         else:
             self.client = Client(name=account, api_id=config.API_ID, api_hash=config.API_HASH, workdir=config.WORKDIR)
-                
+
         if proxy:
             self.proxy = f"{config.PROXY_TYPE}://{proxy.split(':')[2]}:{proxy.split(':')[3]}@{proxy.split(':')[0]}:{proxy.split(':')[1]}"
         else:
             self.proxy = None
-            
+
         headers = {
                     'Accept': 'application/json',
                     'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,bg;q=0.6,mk;q=0.5',
@@ -58,7 +58,7 @@ class Okx:
 
     async def main(self):
         await asyncio.sleep(random.uniform(*config.ACC_DELAY))
-        asyncio.create_task(self.continuous_guess_price())
+
         while True:
             await self.login()
             info = (await self.get_info())
@@ -104,12 +104,13 @@ class Okx:
 
             sleep = random.uniform(*config.BIG_SLEEP)
             logger.info(f'| Поток {self.thread} | {self.name}.session | Ушел в сон заданий на {sleep} сек')
+            await self.continuous_guess_price()
             await asyncio.sleep(sleep)
 
     async def continuous_guess_price(self):
         while True:
             await self.guess_price()
-            await asyncio.sleep(5)
+
 
     async def get_tg_web_data(self):
         await self.client.connect()
@@ -127,13 +128,13 @@ class Okx:
                 ))
 
             auth_url = web_view.url
-            
+
             info = json.loads((unquote(string=unquote(string=auth_url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0])))[5:].split('&chat_instance')[0])
-            
+
             self.user_id = info['id']
             self.first_name = info['first_name']
             self.last_name = info['last_name']
-            
+
         except Exception as err:
             logger.error(f" | Поток{self.thread} | {self.name}.session | {err}")
             if 'USER_DEACTIVATED_BAN' in str(err):
@@ -142,11 +143,11 @@ class Okx:
                 return False
         await self.client.disconnect()
         return unquote(string=auth_url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0])
-    
+
     async def login(self):
         telegram_data = await self.get_tg_web_data()
         self.session.headers['X-Telegram-Init-Data'] = telegram_data
-        
+
     async def get_info(self):
         json_data = {
             "extUserId": self.user_id,
@@ -164,7 +165,7 @@ class Okx:
         )
         await asyncio.sleep(random.uniform(*config.MINI_SLEEP))
         return (await response.json())
-    
+
     async def get_boosts(self):
         params = {
             't': str(int(time.time()*1000)),
@@ -177,7 +178,7 @@ class Okx:
         )
         await asyncio.sleep(random.uniform(*config.MINI_SLEEP))
         return (await response.json())
-    
+
     async def do_boost(self, id_ : int):
         params = {
             't': str(int(time.time()*1000)),
@@ -194,15 +195,15 @@ class Okx:
             json=json_data,
             proxy=self.proxy
         )
-        
+
         await asyncio.sleep(random.uniform(*config.BOOST_SLEEP))
-        
+
         if (await response.json())['code'] == 0:
             return True
         else:
             logger.error(f"Буст| Поток {self.thread} | {self.name}.session | {(await response.json())}")
             return False
-    
+
     async def can_buy(self,boost : dict):
         balance = (await self.get_info())
         if 'data' not in balance:
@@ -217,7 +218,7 @@ class Okx:
         if curStage < totalStage and pointCost <= balance:
             return True
         return False
-    
+
     async def get_tasks(self):
         params = {
             't': str(int(time.time()*1000)),
@@ -230,7 +231,7 @@ class Okx:
         )
         await asyncio.sleep(random.uniform(*config.MINI_SLEEP))
         return (await response.json())
-    
+
     async def do_task(self, id_ : int):
         params = {
             't': str(int(time.time()*1000)),
@@ -246,29 +247,29 @@ class Okx:
             json=json_data,
             proxy = self.proxy
         )
-        
+
         await asyncio.sleep(random.uniform(*config.TASK_SLEEP))
-        
+
         if (await response.json())['code'] == 0:
             return True
         else:
             logger.error(f"Задание | Поток {self.thread} | {self.name}.session | {id_} {(await response.json())}")
             return False
 
-
     async def guess_price(self):
         params = {
-            't': str(int(time.time()*1000)),
+            't': str(int(time.time() * 1000)),
         }
 
         json_data = {
-            'predict': random.randint(0,1),
+            'predict': random.randint(0, 1),
         }
 
         if json_data['predict'] == 0:
             logger.info(f"Игра | Поток {self.thread} | {self.name}.session | SHORT")
         else:
             logger.info(f"Игра | Поток {self.thread} | {self.name}.session | LONG")
+
 
         response = await self.session.post(
             'https://www.okx.com/priapi/v1/affiliate/game/racer/assess',
@@ -277,15 +278,15 @@ class Okx:
             proxy=self.proxy
         )
 
-        try:
-            response_json = await response.json()
-            is_won = response_json['data']['won']
-            claimed = response_json['data']['basePoint']
-            num = response_json['data']['numChance']
-            sec = response_json['data']['secondToRefresh']
-        except Exception as e:
-            logger.error(f"Игра | Поток {self.thread} | {self.name}.session | Error parsing JSON: {e}")
-            return False
+        response_json = await response.json()
+
+
+
+        is_won = response_json.get('data', {}).get('won')
+        claimed = response_json.get('data', {}).get('basePoint')
+        num = response_json.get('data', {}).get('numChance')
+        sec = response_json.get('data', {}).get('secondToRefresh')
+
 
         await asyncio.sleep(5)
 
@@ -302,10 +303,13 @@ class Okx:
             if specific_boost and specific_boost['state'] == 0:
                 await self.do_boost(id_=1)
                 logger.success(f'Взял буст | Поток {self.thread} | {self.name}.session | Восполнение бака')
-        if sec > 0 and num == 1:
-            await asyncio.sleep(sec + 5)
+        if sec is None:
+            sec = 0
+            await asyncio.sleep(65)
+        if sec > 0 and (num == 1 or num == 0):
+            await asyncio.sleep(sec + 10)
+
+        return response_json
 
 
 
-
-        return (await response.json())
