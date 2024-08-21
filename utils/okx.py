@@ -283,12 +283,14 @@ class Okx:
         response_json = await response.json()
 
 
-
-        is_won = response_json.get('data', {}).get('won')
-        claimed = response_json.get('data', {}).get('basePoint')
-        num = response_json.get('data', {}).get('numChance')
-        sec = response_json.get('data', {}).get('secondToRefresh')
-
+        try:
+            is_won = response_json.get('data', {}).get('won')
+            claimed = response_json.get('data', {}).get('basePoint')
+            num = response_json.get('data', {}).get('numChance')
+            sec = response_json.get('data', {}).get('secondToRefresh')
+        except Exception as e:
+            logger.error(f"guess_price | Поток {self.thread} | {self.name}.session | {str(e)}")
+            return False
 
         await asyncio.sleep(5)
 
